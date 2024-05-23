@@ -1,10 +1,18 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:prime_video_clone/constants/colors.dart';
 import 'package:prime_video_clone/screens/otp_screen.dart';
 
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
+
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
+  TextEditingController phoneController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -78,10 +86,11 @@ class SignUpScreen extends StatelessWidget {
                   Container(
                     height: 50.h,
                     width: 0.9.sw,
-                    child: const TextField(
-                      cursorColor: Color(0xFF00A8E1),
+                    child: TextField(
+                      controller: phoneController,
+                      cursorColor: const Color(0xFF00A8E1),
                       cursorHeight: 20,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         filled: true,
                         focusColor: Color(0xFF00A8E1),
                         fillColor: Colors.white,
@@ -102,11 +111,18 @@ class SignUpScreen extends StatelessWidget {
                     height: 50.h,
                     width: 0.9.sw,
                     child: TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => OTPscreen()),
-                        );
+                      onPressed: () async {
+                        await FirebaseAuth.instance.verifyPhoneNumber(
+                            verificationCompleted:
+                                (PhoneAuthCredential credential) {},
+                            verificationFailed: (FirebaseAuthException ex) {},
+                            codeSent:
+                                (String verificationid, int? resendtoken) {
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=>OTPscreen(verificationid: verificationid,)));
+                                },
+                            codeAutoRetrievalTimeout:
+                                (String verificationId) {},
+                            phoneNumber: phoneController.text.toString());
                       },
                       style: ButtonStyle(
                         shape:
@@ -163,8 +179,7 @@ class SignUpScreen extends StatelessWidget {
                         size: 20,
                       ),
                       const DropdownButtonHideUnderline(
-                        child:
-                        Text(
+                        child: Text(
                           'Need help?',
                           style: TextStyle(color: Color(0xFF00A8E1)),
                         ),
@@ -174,9 +189,16 @@ class SignUpScreen extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: 40,),
-            Text('© 1996-2024, Amazon.com, Inc.or its affiliates',style: TextStyle(color: Color(0xFF7b909c)),),
-            SizedBox(height: 40,)
+            SizedBox(
+              height: 40,
+            ),
+            Text(
+              '© 1996-2024, Amazon.com, Inc.or its affiliates',
+              style: TextStyle(color: Color(0xFF7b909c)),
+            ),
+            SizedBox(
+              height: 40,
+            )
           ],
         ),
       ),
